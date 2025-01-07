@@ -1,0 +1,11 @@
+[package]
+name = "actor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actor_core = { path = "../core" }
+log = { version = "0.4.22", features = ["kv", "kv_serde"] }
+tokio = { version = "1.42.0", features = ["full"] }
+rust-embed = { version = "8.5.0", features = ["debug-embed"] }
+lazy_static = "1.5.0"
