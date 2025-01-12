@@ -1,19 +1,22 @@
-use std::fmt::{Display, Formatter};
+use std::str::Utf8Error;
 use crate::db::migrations::{MigrationDef, Version};
 use crate::db::sqlite::Migrator;
+use thiserror::Error;
 
 mod sqlite;
 pub mod migrations;
 
-#[derive(Debug)]
-pub struct DbError {
-    source: String,
-}
-
-impl Display for DbError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "db error: {}", self.source)
-    }
+#[derive(Error, Debug)]
+pub enum DbError {
+    #[error("SQLite db error: {0}")]
+    SQLiteError(#[from]
+                #[source] sqlx::Error),
+    #[error("failed to get migrator file: no file found")]
+    MigratorNoFileError,
+    #[error("migration malformed: {0}")]
+    MigrationMalformedError(String),
+    #[error("failed to parse UTF8: {0}")]
+    UTF8Error(#[from] #[source] Utf8Error)
 }
 
 pub enum Database {
@@ -32,7 +35,7 @@ pub async fn build_db(
             let migrator = Migrator::new(&db, up, down).await?;
             migrator.migrate_up(&db, schema_version).await?;
             Ok(Database::SQLite(db))
-        },
+        }
         Err(e) => Err(e),
     }
 }

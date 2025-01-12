@@ -54,14 +54,6 @@ pub async fn build_main_db(config: DbConfig) -> Result<Database, DbError> {
     })
 }
 
-impl From<Error> for DbError {
-    fn from(err: Error) -> Self {
-        DbError {
-            source: err.to_string(),
-        }
-    }
-}
-
 #[derive(Embed)]
 #[folder = "resources/migrations/sqlite/"]
 struct MigrationDefs;
@@ -107,9 +99,7 @@ impl Migrator {
         log::trace!("Migrator [{database}]: getting migrator base DB structure file.", database = db.id.clone());
         let migrations_file = match MigrationDefs::get("migrator.sql") {
             Some(f) => f,
-            None => return Err(DbError {
-                source: "failed to get migrator file: no file found".to_string(),
-            }),
+            None => return Err(DbError::MigratorNoFileError),
         };
         log::trace!("Migrator [{database}]: establishing base migrator tables.", database = db.id.clone());
         db.get_connection().await?.execute(sqlx::raw_sql(str::from_utf8(migrations_file.data.as_ref())?)).await?;
@@ -430,14 +420,6 @@ impl Migrator {
         }
 
         Ok(())
-    }
-}
-
-impl From<Utf8Error> for DbError {
-    fn from(value: Utf8Error) -> Self {
-        Self {
-            source: format!("failed to parse UTF8: {}", value)
-        }
     }
 }
 

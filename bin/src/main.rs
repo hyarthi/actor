@@ -1,7 +1,11 @@
 mod db;
+mod modules;
+mod http;
+mod registry;
 
 use std::env;
 use crate::db::build_main_db;
+use crate::registry::registry;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -17,8 +21,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     log::set_logger(main_logger).unwrap();
 
     log::info!(">>>>>>> logging via log!");
-    
-    let db = build_main_db().await.unwrap();
 
+    let db = build_main_db().await.unwrap();
+    
+    let registry = registry();
+    registry.start().await?;
+
+    log::info!("Application stopped");
     Ok(())
 }

@@ -13,10 +13,6 @@ Cargo.lock
 
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
-/.idea/.gitignore
-/.idea/actor.iml
-/.idea/dataSources.xml
-/.idea/git_toolbox_blame.xml
-/.idea/modules.xml
-/.idea/sqldialects.xml
-/.idea/vcs.xml
+
+# JetBrains IDEs
+/.idea/

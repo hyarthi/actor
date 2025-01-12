@@ -1,7 +1,10 @@
+use std::fmt::{Display, Formatter};
 use crate::config;
 use lazy_static::lazy_static;
 use serde_derive::Deserialize;
 use std::sync::Arc;
+use flexi_logger::FlexiLoggerError;
+use thiserror::Error;
 
 mod loglog;
 
@@ -24,6 +27,12 @@ pub enum LogLevel {
     INFO,
     WARN,
     ERROR,
+}
+
+impl Display for LogLevel {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.stringify())
+    }
 }
 
 lazy_static! {
@@ -79,9 +88,16 @@ pub struct SinkConfig {
     file_max_log_history: Option<u32>,
 }
 
-#[derive(Debug)]
-pub struct LogError {
-    source: String,
+#[derive(Error, Debug)]
+pub enum LogError {
+    #[error("failed to read logging config struct")]
+    ConfigReadError,
+    #[error("log level not found: {0}")]
+    LogLevelNotFoundError(LogLevel),
+    #[error("syslog error: {0}")]
+    SyslogError(#[from] #[source] syslog::Error),
+    #[error(transparent)]
+    FlexiLoggerError(#[from] FlexiLoggerError)
 }
 
 lazy_static! {
@@ -100,9 +116,7 @@ fn build_main_logger() -> Arc<dyn log::Log> {
     let main_config = config::main_config();
 
     let mut config = config::read_struct::<LoggerConfig>(main_config, &["logging".to_string()])
-        .ok_or(LogError {
-            source: "failed to read struct".to_string(),
-        }).unwrap();
+        .ok_or(LogError::ConfigReadError).unwrap();
     config.id = "actor".to_string();
     Arc::new(loglog::LogLogger::new(config).unwrap())
 }

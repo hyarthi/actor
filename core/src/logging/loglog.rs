@@ -136,9 +136,7 @@ impl LogLogger {
                     }) {
                         Ok(l) => Box::new(syslog::BasicLogger::new(l)),
                         Err(e) => {
-                            return Err(LogError {
-                                source: format!("{}", e),
-                            })
+                            return Err(LogError::SyslogError(e))
                         }
                     };
                     sinks.push(Sink { delegate: sink });
@@ -147,7 +145,7 @@ impl LogLogger {
         }
         let idx = ordered_log_levels.iter()
             .position(|&l| l == config.level)
-            .ok_or_else(|| { return LogError { source: "log level not found".to_string() }; })?;
+            .ok_or_else(|| { return LogError::LogLevelNotFoundError(config.level); })?;
 
         Ok(LogLogger {
             config,
@@ -155,14 +153,6 @@ impl LogLogger {
             sinks,
             flexi_handles: handles,
         })
-    }
-}
-
-impl From<flexi_logger::FlexiLoggerError> for LogError {
-    fn from(error: flexi_logger::FlexiLoggerError) -> Self {
-        LogError {
-            source: error.to_string(),
-        }
     }
 }
 

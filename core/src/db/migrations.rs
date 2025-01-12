@@ -17,40 +17,40 @@ impl MigrationDef {
     pub fn new(file_name: String, file: EmbeddedFile) -> Result<Self, DbError> {
         let parts: Vec<&str> = file_name.split('-').collect();
         if parts.len() != 2 {
-            return Err(DbError {
-                source: format!("migration file name corrupted [{}]: no build version", file_name),
-            });
+            return Err(DbError::MigrationMalformedError (
+                format!("migration file name corrupted [{}]: no build version", file_name).to_string()
+            ));
         }
         let version_parts: Vec<&str> = parts[0].split('.').collect();
         if version_parts.len() != 3 {
-            return Err(DbError {
-                source: format!("migration file name corrupted [{}]: version is mangled", file_name),
-            });
+            return Err(DbError::MigrationMalformedError (
+                format!("migration file name corrupted [{}]: version is mangled", file_name).to_string(),
+            ));
         }
         let version_major = match u32::from_str_radix(version_parts[0], 10) {
             Ok(u) => u,
-            Err(e) => return Err(DbError {
-                source: format!("migration file name corrupted [{}]: major version [{}] is not a number: {}", file_name, version_parts[0], e)
-            })
+            Err(e) => return Err(DbError::MigrationMalformedError (
+                format!("migration file name corrupted [{}]: major version [{}] is not a number: {}", file_name, version_parts[0], e).to_string()
+            ))
         };
         let version_minor = match u32::from_str_radix(version_parts[1], 10) {
             Ok(u) => u,
-            Err(e) => return Err(DbError {
-                source: format!("migration file name corrupted [{}]: minor version [{}] is not a number: {}", file_name, version_parts[1], e)
-            })
+            Err(e) => return Err(DbError::MigrationMalformedError (
+                format!("migration file name corrupted [{}]: minor version [{}] is not a number: {}", file_name, version_parts[1], e).to_string()
+            ))
         };
         let version_patch = match u32::from_str_radix(version_parts[2], 10) {
             Ok(u) => u,
-            Err(e) => return Err(DbError {
-                source: format!("migration file name corrupted [{}]: patch version [{}] is not a number: {}", file_name, version_parts[2], e)
-            })
+            Err(e) => return Err(DbError::MigrationMalformedError (
+                format!("migration file name corrupted [{}]: patch version [{}] is not a number: {}", file_name, version_parts[2], e).to_string()
+            ))
         };
         let trimmed_build = parts[1].split('.').next().unwrap();
         let build_number = match u32::from_str_radix(trimmed_build, 10) {
             Ok(u) => u,
-            Err(e) => return Err(DbError {
-                source: format!("migration file name corrupted [{}]: build number [{}] is not a number: {}", file_name, trimmed_build, e)
-            })
+            Err(e) => return Err(DbError::MigrationMalformedError (
+                format!("migration file name corrupted [{}]: build number [{}] is not a number: {}", file_name, trimmed_build, e).to_string()
+            ))
         };
         let file_hash = sha256::digest(file.data.as_ref());
 
