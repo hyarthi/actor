@@ -69,7 +69,7 @@ impl Default for LogLogger {
                 file_max_log_history: None,
             }],
         })
-            .unwrap_or_else(|e| {
+            .unwrap_or_else(|_e| {
                 println!("failed to create default logger!");
                 LogLogger {
                     config: LoggerConfig {

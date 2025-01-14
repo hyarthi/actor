@@ -1,9 +1,9 @@
 use std::fmt::{Display, Formatter};
 use crate::config;
 use lazy_static::lazy_static;
-use serde_derive::Deserialize;
 use std::sync::Arc;
 use flexi_logger::FlexiLoggerError;
+use serde::Deserialize;
 use thiserror::Error;
 
 mod loglog;
@@ -59,12 +59,12 @@ impl LogLevel {
 
 #[derive(Deserialize, Copy, Clone, Eq, PartialEq)]
 pub enum FieldType {
-    STRING,
-    INT,
-    BOOL,
-    FLOAT,
-    DATE_TIME,
-    BINARY,
+    String,
+    Int,
+    Bool,
+    Float,
+    DateTime,
+    Binary,
 }
 
 #[derive(Deserialize)]

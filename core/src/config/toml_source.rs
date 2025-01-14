@@ -68,7 +68,7 @@ pub(crate) fn new_toml_source(file_path: String) -> Result<TomlSource, String> {
     Ok(TomlSource { delegate })
 }
 
-pub(crate) struct TomlSource {
+pub struct TomlSource {
     delegate: Table,
 }
 

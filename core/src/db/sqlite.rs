@@ -3,14 +3,12 @@ use crate::config::main_config;
 use crate::db::migrations::{MigrationDef, Version};
 use crate::db::DbError;
 use chrono::{DateTime, Local};
-use rust_embed::{Embed, EmbeddedFile};
-use serde_derive::Deserialize;
+use rust_embed::Embed;
+use serde::Deserialize;
 use sqlx::pool::PoolConnection;
 use sqlx::sqlite::{SqliteAutoVacuum, SqliteConnectOptions};
-use sqlx::{Acquire, Decode, Error, Executor, FromRow, Sqlite, SqlitePool, Type};
-use std::fmt::{Display, Formatter};
+use sqlx::{Executor, FromRow, Sqlite, SqlitePool, Type};
 use std::str;
-use std::str::Utf8Error;
 
 #[derive(Deserialize)]
 pub struct DbConfig {
@@ -34,7 +32,7 @@ pub struct Database {
 }
 
 impl Database {
-    async fn get_connection(&self) -> Result<PoolConnection<Sqlite>, DbError> {
+    pub async fn get_connection(&self) -> Result<PoolConnection<Sqlite>, DbError> {
         let conn = self.delegate.acquire().await?;
         Ok(conn)
     }
@@ -99,7 +97,7 @@ impl Migrator {
         log::trace!("Migrator [{database}]: getting migrator base DB structure file.", database = db.id.clone());
         let migrations_file = match MigrationDefs::get("migrator.sql") {
             Some(f) => f,
-            None => return Err(DbError::MigratorNoFileError),
+            None => return Err(DbError::MigratorNoFile),
         };
         log::trace!("Migrator [{database}]: establishing base migrator tables.", database = db.id.clone());
         db.get_connection().await?.execute(sqlx::raw_sql(str::from_utf8(migrations_file.data.as_ref())?)).await?;

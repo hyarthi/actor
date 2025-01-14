@@ -1,1 +1,1 @@
-mod scene;
+pub(crate) mod scene;

@@ -9,14 +9,14 @@ pub mod migrations;
 #[derive(Error, Debug)]
 pub enum DbError {
     #[error("SQLite db error: {0}")]
-    SQLiteError(#[from]
+    SQLite(#[from]
                 #[source] sqlx::Error),
     #[error("failed to get migrator file: no file found")]
-    MigratorNoFileError,
+    MigratorNoFile,
     #[error("migration malformed: {0}")]
-    MigrationMalformedError(String),
+    MigrationMalformed(String),
     #[error("failed to parse UTF8: {0}")]
-    UTF8Error(#[from] #[source] Utf8Error)
+    UTF8ParseFailed(#[from] #[source] Utf8Error)
 }
 
 pub enum Database {
